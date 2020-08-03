@@ -1,0 +1,105 @@
+version: '3'
+
+services:
+  portainer:
+   image: portainer/portainer
+   container_name: portainer
+   restart: always
+   ports:
+    - 9000:9000
+    - 8000:8000
+   command: -H unix:///var/run/docker.sock
+   networks:
+    JMM-Docker:
+      ipv4_address: 00.00.00.00
+   volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    - portainer_data:/data
+
+  radarr:
+   container_name: Radarr
+   restart: unless-stopped
+   ports:
+    - 7878:7878
+   volumes:
+    - /home/jmaze/Data:/media
+   image: linuxserver/radarr:latest
+   networks:
+    JMM-Docker:
+      ipv4_address: 00.00.00.00
+  
+  TransmissionVPN:
+   privileged: true
+   container_name: TransmissionVPN
+   image: haugene/transmission-openvpn
+   restart: always
+   ports:
+    - 9091:9091
+    - 8888:8888
+   volumes:
+    - /home/jmaze/Data:/media
+    - /home/jmaze/cyberghost/default.ovpn:/etc/openvpn/custom/default.ovpn
+    - /home/jmaze/cyberghost/:/etc/openvpn/custom/
+   environment:
+    - OPENVPN_PROVIDER=CUSTOM
+    - OPENVPN_USERNAME=YEW
+    - OPENVPN_PASSWORD=YEW
+    - TRANSMISSION_DOWNLOAD_DIR=/media/downloads
+    - TRANSMISSION_INCOMPLETE_DIR=/media/incomplete
+    - TRANSMISSION_SEED_QUEUE_ENABLED=true
+    - TRANSMISSION_SPEED_LIMIT_UP=500
+    - TRANSMISSION_SPEED_LIMIT_UP_ENABLED=true
+    - TRANSMISSION_UPLOAD_SLOTS_PER_TORRENT=10
+    - TRANSMISSION_WEB_UI=combustion
+    - LOCAL_NETWORK=10.50.0.0/16
+   networks:
+    JMM-Docker:
+      ipv4_address: 00.00.00.00
+  
+  jackett:
+   container_name: jackett
+   restart: unless-stopped
+   ports:
+    - 9117:9117
+   image: linuxserver/jackett
+   networks:
+    JMM-Docker:
+      ipv4_address: 00.00.00.00
+  
+  sonarr:
+    container_name: Sonarr
+    restart: unless-stopped
+    ports:
+     - 8989:8989
+    volumes:
+     - /home/jmaze/Data:/media
+    image: linuxserver/sonarr
+    networks:
+     JMM-Docker:
+      ipv4_address: 00.00.00.00
+
+
+  ghost:
+    container_name: GhostBlog
+    restart: unless-stopped
+    image: ghost:latest
+    ports:
+     - 2368:2368
+    environment:
+      url: http://example.com:2368
+    networks:
+      JMM-Docker:
+        ipv4_address: 00.00.00.00
+
+
+volumes:
+ portainer_data:
+
+networks:
+  JMM-Docker:
+    driver: macvlan
+    driver_opts:
+      parent: ens01
+    ipam:
+      config:
+        - subnet: 00.00.00.0/25
