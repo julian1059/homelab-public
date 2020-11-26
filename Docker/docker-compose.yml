@@ -126,7 +126,7 @@ services:
       - "443:443/tcp"
     environment:
       TZ: 'America/Los_Angeles'
-      WEBPASSWORD: '14Sam97sung!?'
+      WEBPASSWORD: 'xxxxxxxxxxxxxxxxxxxx'
     volumes:
       - /home/DockerConfigs/pihole/etc-pihole/:/etc/pihole/
       - /home/DockerConfigs/pihole/etc-dnsmasq.d/:/etc/dnsmasq.d/
