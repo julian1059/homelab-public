@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   portainer:
-   image: portainer/portainer:latest
+   image: portainer/portainer-ce:latest
    container_name: portainer
    restart: always
    ports:
@@ -88,7 +88,7 @@ services:
     ports:
      - 2368:2368
     environment:
-      url: http://dana.pup:2368
+      url: http://dana.pup
     networks:
       JMM-Docker:
         ipv4_address: 10.50.25.7
@@ -126,7 +126,7 @@ services:
       - "443:443/tcp"
     environment:
       TZ: 'America/Los_Angeles'
-      WEBPASSWORD: 'xxxxxxxxxxxxxxxxxxxx'
+      WEBPASSWORD: xxxxxxxxxxxxxxxxxxxxx
     volumes:
       - /home/DockerConfigs/pihole/etc-pihole/:/etc/pihole/
       - /home/DockerConfigs/pihole/etc-dnsmasq.d/:/etc/dnsmasq.d/
@@ -140,17 +140,37 @@ services:
         ipv4_address: 10.50.25.10
 
   caddy:
-    image: caddy:latest
+    build: 
+      dockerfile: /home/DockerConfigs/caddy/DockerFile
+      context: /home/DockerConfigs/caddy/
     container_name: caddy
+    environment:
+      - ACME_AGREE=true
+      - CLOUDFLARE_EMAIL=email@email.com
+      - CLOUDFLARE_API_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     ports: 
       - "80:80"
       - "443:443"
     volumes: 
       - /home/DockerConfigs/caddy/:/config
       - /home/DockerConfigs/caddy/data/:/data
+      - /home/DockerConfigs/caddy/CaddyFile:/etc/caddy/Caddyfile
+      - /home/DockerConfigs/caddy/www/:/var/www/html
     networks: 
       JMM-Docker:
         ipv4_address: 10.50.25.11
+
+  phpfpm:
+    container_name: phpfpm
+    image: bitnami/php-fpm:latest
+    ports:
+      - "9000:9000"
+    volumes: 
+      - /home/DockerConfigs/phpfpm/:/app
+      - /home/DockerConfigs/caddy/www/:/var/www/html
+    networks: 
+      JMM-Docker:
+        ipv4_address: 10.50.25.12
 
 volumes:
  portainer_data:
